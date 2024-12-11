@@ -1,0 +1,96 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class GuessNumberGame {
+
+    // Declare UI components
+    private JFrame frame;
+    private JTextField textField;
+    private JLabel feedbackLabel;
+    private JLabel chancesLabel;
+    private JButton submitButton;
+    private GameLogic gameLogic; // Instance of the GameLogic class
+
+    public static void main(String[] args) {
+        // Run the game
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new GuessNumberGame().createAndShowGUI();
+            }
+        });
+    }
+
+    // Constructor to initialize the game logic
+    public GuessNumberGame() {
+        gameLogic = new GameLogic(); // Initialize GameLogic
+    }
+
+    // Method to create and show the GUI
+    private void createAndShowGUI() {
+        // Create the main frame
+        frame = new JFrame("Guess the Number Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(400, 250);
+        frame.setLayout(new FlowLayout());
+
+        // Create and add UI components
+        JLabel titleLabel = new JLabel("Guess the Number between 1 and 100");
+        frame.add(titleLabel);
+
+        textField = new JTextField(10);
+        frame.add(textField);
+
+        submitButton = new JButton("Submit Guess");
+        frame.add(submitButton);
+
+        feedbackLabel = new JLabel("");
+        frame.add(feedbackLabel);
+
+        chancesLabel = new JLabel("Chances Left: " + gameLogic.getChancesLeft());
+        frame.add(chancesLabel);
+
+        // Add action listener to the submit button
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                handleGuess();
+            }
+        });
+
+        // Make the frame visible
+        frame.setVisible(true);
+    }
+
+    // Handle the guess logic when the button is clicked
+    private void handleGuess() {
+        // Get the user's guess
+        try {
+            int userGuess = Integer.parseInt(textField.getText());
+            if (userGuess < 1 || userGuess > 100) {
+                feedbackLabel.setText("Please guess a number between 1 and 100.");
+                return;
+            }
+
+            // Check the user's guess using the GameLogic class
+            String result = gameLogic.checkGuess(userGuess);
+            feedbackLabel.setText(result);
+
+            // Update the chances left label
+            chancesLabel.setText("Chances Left: " + gameLogic.getChancesLeft());
+
+            // If the game is over, show the "You Lost" message
+            if (gameLogic.isGameOver()) {
+                if (userGuess != gameLogic.getRandomNumber()) {
+                    feedbackLabel.setText("You Lost! The number was " + gameLogic.getRandomNumber());
+                }
+                textField.setEditable(false); // Disable the input field
+                submitButton.setEnabled(false); // Disable the button
+            }
+        } catch (NumberFormatException ex) {
+            feedbackLabel.setText("Invalid input! Please enter a number.");
+        }
+    }
+}
